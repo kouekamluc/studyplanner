@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('planner.urls')),
     path('api/analytics/', include('analytics.urls')),  # Add this line
-
+    path('api/<str:version>/', include('planner.urls')),
+    path('api/', include('notifications.urls')),  # Add this line
     path('api-auth/', include('rest_framework.urls')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

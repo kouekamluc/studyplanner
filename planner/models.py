@@ -77,11 +77,6 @@ class Task(models.Model):
     tags = models.CharField(max_length=200, blank=True)  # Comma-separated tags
     reminder = models.DateTimeField(null=True, blank=True)
     files = models.ManyToManyField(File, related_name='tasks', blank=True)
-
-
-
-
-
     def __str__(self):
         return self.title
 
@@ -94,8 +89,6 @@ class StudySession(models.Model):
     productivity_rating = models.IntegerField(choices=[(1, 'Poor'), (2, 'Fair'), (3, 'Good'), (4, 'Excellent')], null=True)
     notes = models.TextField(blank=True)
     reminder = models.DateTimeField(null=True, blank=True)
-
-
     def __str__(self):
         return f"{self.course.name} - {self.start_time.date()}"
 
@@ -105,6 +98,18 @@ class LearningStyle(models.Model):
     auditory_score = models.IntegerField(default=0)
     reading_writing_score = models.IntegerField(default=0)
     kinesthetic_score = models.IntegerField(default=0)
-
     def __str__(self):
         return f"{self.user.username}'s Learning Style"
+    
+    
+
+class PomodoroSession(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='pomodoro_sessions')
+    start_time = models.DateTimeField(auto_now_add=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    duration = models.DurationField()
+    completed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Pomodoro for {self.task.title} - {self.start_time.date()}"

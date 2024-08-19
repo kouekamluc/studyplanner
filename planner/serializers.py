@@ -1,12 +1,8 @@
 
 from rest_framework import serializers
-from .models import Course, Task, StudySession, LearningStyle, UserProfile , Tag,File
+from .models import Course, Task, StudySession, LearningStyle, UserProfile , Tag,File,PomodoroSession
+
 from django.contrib.auth.models import User
-
-
-
-
-
 
 
 
@@ -41,6 +37,7 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = ['id', 'name']
 
+
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
@@ -70,6 +67,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         return instance
 
+
 class CourseSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, required=False)
     files = FileSerializer(many=True, read_only=True)
@@ -87,6 +85,7 @@ class CourseSerializer(serializers.ModelSerializer):
             course.tags.add(tag)
         return course
 
+
 class TaskSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, required=False)
     files = FileSerializer(many=True, read_only=True)
@@ -103,6 +102,7 @@ class TaskSerializer(serializers.ModelSerializer):
             tag, _ = Tag.objects.get_or_create(name=tag_data['name'], user=task.user)
             task.tags.add(tag)
         return task
+    
 class StudySessionSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudySession
@@ -112,3 +112,11 @@ class LearningStyleSerializer(serializers.ModelSerializer):
     class Meta:
         model = LearningStyle
         fields = '__all__'
+        
+    
+
+class PomodoroSessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PomodoroSession
+        fields = ['id', 'task', 'start_time', 'end_time', 'duration', 'completed']
+        read_only_fields = ['start_time', 'end_time', 'completed']

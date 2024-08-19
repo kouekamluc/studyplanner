@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
 from django_filters.rest_framework import DjangoFilterBackend
-
+from django.utils import timezone
 # Create your views here.
 from rest_framework import viewsets, status,filters
 from rest_framework.response import Response
@@ -9,12 +9,16 @@ from rest_framework import viewsets
 from django.contrib.auth.models import User
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Course, File, Tag,Task, StudySession, LearningStyle
+from .models import Course, File, Tag,Task, StudySession, LearningStyle,PomodoroSession
 from rest_framework.parsers import MultiPartParser, FormParser
 
-from .serializers import FileSerializer,TagSerializer, CourseSerializer,UserRegistrationSerializer, TaskSerializer,UserSerializer, StudySessionSerializer, LearningStyleSerializer
+from .serializers import (FileSerializer,TagSerializer, 
+                          CourseSerializer,
+                          UserRegistrationSerializer,
+                          PomodoroSessionSerializer,
+                          TaskSerializer,UserSerializer, 
+                          StudySessionSerializer, LearningStyleSerializer)
 import logging
-from rest_framework.exceptions import ValidationError
 from .filters import CourseFilter, TaskFilter, StudySessionFilter
 
 
@@ -183,3 +187,34 @@ class LearningStyleViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return LearningStyle.objects.filter(user=self.request.user)
+    
+    
+
+class PomodoroSessionViewSet(viewsets.ModelViewSet):
+    serializer_class = PomodoroSessionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return PomodoroSession.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    @action(detail=True, methods=['post'])
+    def start(self, request, pk=None):
+        pomodoro = self.get_object()
+        if pomodoro.start_time is None:
+            pomodoro.start_time = timezone.now()
+            pomodoro.save()
+            return Response({'status': 'Pomodoro session started'})
+        return Response({'status': 'Pomodoro session already started'}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def complete(self, request, pk=None):
+        pomodoro = self.get_object()
+        if pomodoro.end_time is None:
+            pomodoro.end_time = timezone.now()
+            pomodoro.completed = True
+            pomodoro.save()
+            return Response({'status': 'Pomodoro session completed'})
+        return Response({'status': 'Pomodoro session already completed'}, status=status.HTTP_400_BAD_REQUEST)

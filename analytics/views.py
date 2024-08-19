@@ -5,7 +5,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .utils import get_study_time_per_course, get_task_completion_rate, get_productivity_trend, get_course_progress
+from .utils import get_study_time_per_course, get_task_completion_rate, get_productivity_trend, get_course_progress,get_dashboard_summary
 from django.utils.dateparse import parse_date
 
 class StudyTimePerCourseView(APIView):
@@ -40,4 +40,12 @@ class CourseProgressView(APIView):
 
     def get(self, request):
         data = get_course_progress(request.user)
+        return Response(data)
+    
+
+class DashboardSummaryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        data = get_dashboard_summary(request.user)
         return Response(data)
